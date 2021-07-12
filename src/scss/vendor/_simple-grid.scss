@@ -1,0 +1,36 @@
+.container {
+  --container-max-width: 1200px;
+  --container-padding: 15px;
+  --gutter: 30px;
+
+  width: 100%;
+  max-width: var(--container-max-width);
+
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+
+  margin-left: calc(var(--container-padding) * -1);
+  margin-right: calc(var(--container-padding) * -1);
+}
+
+.col {
+  padding: 0 calc(var(--gutter) / 2);
+}
+
+.-cols1 .col { flex: 0 0 calc((100% / 12) * calc(12 / 1)); }
+.-cols2 .col { flex: 0 0 calc((100% / 12) * calc(12 / 2)); }
+.-cols3 .col { flex: 0 0 calc((100% / 12) * calc(12 / 3)); }
+.-cols4 .col { flex: 0 0 calc((100% / 12) * calc(12 / 4)); }
+.-cols5 .col { flex: 0 0 calc((100% / 12) * calc(12 / 5)); }
+.-cols6 .col { flex: 0 0 calc((100% / 12) * calc(12 / 6)); }
+.-cols7 .col { flex: 0 0 calc((100% / 12) * calc(12 / 7)); }
+.-cols8 .col { flex: 0 0 calc((100% / 12) * calc(12 / 8)); }
+.-cols9 .col { flex: 0 0 calc((100% / 12) * calc(12 / 9)); }
+.-cols10 .col { flex: 0 0 calc((100% / 12) * calc(12 / 10)); }
+.-cols11 .col { flex: 0 0 calc((100% / 12) * calc(12 / 11)); }
+.-cols12 .col { flex: 0 0 calc((100% / 12) * calc(12 / 12)); }

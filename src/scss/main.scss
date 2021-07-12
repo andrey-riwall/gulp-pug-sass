@@ -1,0 +1,11 @@
+// INPORT SETT
+@import 'fonts';
+@import 'vars';
+@import 'mixins';
+@import 'vendor';
+@import 'settings';
+
+// IMPORT COMPONENTS
+@import './components/container';
+@import './components/header';
+@import './components/footer';

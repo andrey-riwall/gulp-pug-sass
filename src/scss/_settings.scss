@@ -1,0 +1,45 @@
+// ALL
+html {
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style: none;
+
+  font-family: 'Roboto-Light', sans-serif;
+}
+
+img {
+  max-width: 100%;
+}
+
+.is_outer {
+  position: relative !important;
+  left: -9999px !important;
+}
+
+.is_hidden {
+  display: none !important;
+}
+
+.for_mobile {
+  display: none;
+
+  @include mobile {
+    display: block;
+  }
+}
+
+.error_ {
+  border: 2px solid #ff4019 !important;
+}
+
+.visualy_hidden {
+  @include visualy-hidden;
+}
