@@ -12,11 +12,17 @@ html {
   text-decoration: none;
   list-style: none;
 
-  font-family: 'Roboto-Light', sans-serif;
+  font-family: '', sans-serif;
 }
 
 img {
   max-width: 100%;
+}
+
+button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 
 .is_outer {

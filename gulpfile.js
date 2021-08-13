@@ -19,6 +19,11 @@ const uglify = require('gulp-uglify-es').default;
 const tiny = require('gulp-tinypng-compress');
 const gutil = require('gulp-util');
 const ftp = require('vinyl-ftp');
+const pug = require('gulp-pug');
+const pugLinter = require('gulp-pug-linter');
+const rev = require('gulp-rev');
+const revRewrite = require('gulp-rev-rewrite');
+const revdel = require('gulp-rev-delete-original');
 
 
 
@@ -37,7 +42,7 @@ const fonts = () => {
 
 // svg sprites
 const svgSprites = () => {
-    return src('./src/img/**.svg')
+    return src('./src/img/**/**.svg')
         .pipe(svgSprite({
             mode: {
                 stack: {
@@ -46,6 +51,22 @@ const svgSprites = () => {
             }
         }))
         .pipe(dest('./app/img'))
+}
+
+
+// pug to html
+const layout = () => {
+    return src('./src///*.pug')
+    .pipe(pug({
+        pretty: true
+    }).on('error', notify.onError()))
+    .pipe(dest('./app/'))
+    .pipe(browserSync.stream())
+}
+
+const layoutLinter = () => {
+    return src('./src/**/**/*.pug')
+        .pipe(pugLinter({ failAfterError: true }))
 }
 
 
@@ -71,21 +92,9 @@ const styles = () => {
 }
 
 
-// prefix html
-const htmlInclude = () => {
-    return src(['./src/index.html'])
-        .pipe(fileinclude({
-            prefix: '@',
-            basepath: '@file'
-        }))
-        .pipe(dest('./app'))
-        .pipe(browserSync.stream());
-}
-
-
 // dest img
 const imgToApp = () => {
-    return src(['./src/img/**.jpg', './src/img/**.png', './src/img/**.jpeg'])
+    return src(['./src/img/**/**.jpg', './src/img/**/**.png', './src/img/**/**.jpeg'])
         .pipe(dest('./app/img'))
 }
 
@@ -105,28 +114,7 @@ const clean = () => {
 
 // scripts
 const scripts = () => {
-    return src('./src/js/main.js')
-        .pipe(webpackStream({
-            output: {
-                filename: 'main.js'
-            },
-            module: {
-                rules: [{
-                    test: /\.m?js$/,
-                    exclude: /node_modules/,
-                    use: {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [
-                                ['@babel/preset-env', {
-                                    targets: "defaults"
-                                }]
-                            ]
-                        }
-                    }
-                }]
-            }
-        }))
+    return src('./src/js/**/**.js')
         .pipe(sourcemaps.init())
         .pipe(uglify().on('error', notify.onError()))
         .pipe(sourcemaps.write('.'))
@@ -143,12 +131,12 @@ const watchFiles = () => {
         }
     });
 
+    watch('./src/**/**/*.pug', layout);
     watch('./src/scss/**/*.scss', styles);
-    watch('./src/index.html', htmlInclude);
-    watch('./src/img/**.jpg', imgToApp);
-    watch('./src/img/**.png', imgToApp);
-    watch('./src/img/**.jpeg', imgToApp);
-    watch('./src/img/**.svg', svgSprites);
+    watch('./src/img/**/**.jpg', imgToApp);
+    watch('./src/img/**/**.png', imgToApp);
+    watch('./src/img/**/**.jpeg', imgToApp);
+    watch('./src/img/**/**.svg', svgSprites);
     watch('./src/resources/**', resources);
     watch('./src/fonts/**.ttf', fonts);
     watch('./src/js/**/*.js', scripts);
@@ -156,12 +144,12 @@ const watchFiles = () => {
 
 
 // tasks
+exports.layout = layout;
 exports.styles = styles;
 exports.watchFiles = watchFiles;
-exports.fileinclude = htmlInclude;
 
 // start assembly
-exports.default = series(clean, parallel(htmlInclude, scripts, fonts, resources, imgToApp, svgSprites), styles, watchFiles);
+exports.default = series(clean, parallel(layout, layoutLinter, scripts, fonts, resources, imgToApp, svgSprites), styles, watchFiles);
 
 
 
@@ -169,12 +157,22 @@ exports.default = series(clean, parallel(htmlInclude, scripts, fonts, resources,
 
 // compress
 const tinypng = () => {
-    return src(['./src/img/**.jpg', './src/img/**.png', './src/img/**.jpeg'])
+    return src(['./src/img/**/**.jpg', './src/img/**/**.png', './src/img/**/**.jpeg'])
         .pipe(tiny({
             key: 'LZQqrGgVXzdQRdPYJMKhv6R5hs6kQMr2',
             log: true
         }))
         .pipe(dest('./app/img'))
+}
+
+
+// pug to html
+const layoutBuild = () => {
+    return src('./src///*.pug')
+    .pipe(pug({
+        pretty: true
+    }).on('error', notify.onError()))
+    .pipe(dest('./app/'))
 }
 
 
@@ -199,36 +197,46 @@ const stylesBuild = () => {
 
 // scripts
 const scriptsBuild = () => {
-    return src('./src/js/main.js')
-        .pipe(webpackStream({
-            mode: 'development',
-            output: {
-                filename: 'main.js',
-            },
-            module: {
-                rules: [{
-                    test: /\.m?js$/,
-                    exclude: /(node_modules|bower_components)/,
-                    use: {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: ['@babel/preset-env']
-                        }
-                    }
-                }]
-            },
-        }))
-        .on('error', function (err) {
-            console.error('WEBPACK ERROR', err);
-            this.emit('end'); // Don't stop the rest of the task
-        })
-        .pipe(uglify().on("error", notify.onError()))
+    return src('./src/js/**/**.js')
+        .pipe(uglify().on('error', notify.onError()))
         .pipe(dest('./app/js'))
 }
 
 
+
 // start build
-exports.build = series(clean, parallel(htmlInclude, scriptsBuild, fonts, resources, imgToApp, svgSprites), stylesBuild, tinypng);
+exports.build = series(clean, parallel(layoutBuild, scriptsBuild, fonts, resources, imgToApp, svgSprites), stylesBuild, tinypng);
+
+
+
+// CACHE
+
+// cache
+const cache = () => {
+    return src('app/**/*.{css,js,svg,png,jpg,jpeg,woff2,woff}', {
+        base: 'app'
+    })
+        .pipe(rev())
+        .pipe(revdel())
+        .pipe(dest('app'))
+        .pipe(rev.manifest('rev.json'))
+        .pipe(dest('app'))
+}
+
+
+// rewrite
+const rewrite = () => {
+    const manifest = src('app/rev.json')
+
+    return src('app/**/*.html')
+        .pipe(revRewrite({
+            manifest
+        }))
+        .pipe(dest('app'))
+}
+
+// start cache
+exports.cache = series(cache, rewrite);
 
 
 

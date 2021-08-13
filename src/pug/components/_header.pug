@@ -1,0 +1,14 @@
+block headerVars 
+  - var menuValues = [ '', ];
+
+header.header 
+  .container.header__container 
+
+    a.header__logo(href='#')
+      +svg('header--logo')
+
+    nav.header__nav.nav 
+      ul.nav__list 
+        each value in menuValues 
+          li.nav__item
+            a.nav__link(href="#") #{value}
