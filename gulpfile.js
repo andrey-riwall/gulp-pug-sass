@@ -170,7 +170,7 @@ const tinypng = () => {
 const layoutBuild = () => {
     return src('./src///*.pug')
     .pipe(pug({
-        pretty: true
+        pretty: false
     }).on('error', notify.onError()))
     .pipe(dest('./app/'))
 }
